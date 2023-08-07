@@ -1,0 +1,14 @@
+configVersion: 1
+project: assemblypointprojectregistry
+
+---
+image: assembly_point__common_python
+dockerfile: srv/common-python/Dockerfile
+---
+
+image: assembly_point__balancer
+dockerfile: src/assembly_point__balancer/Dockerfile
+---
+
+image: assembly_point__old_web
+dockerfile: src/assembly_point__old_web/Dockerfile

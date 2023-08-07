@@ -1,0 +1,298 @@
+﻿.header{
+	position: fixed;
+	top:0px;
+	left:0px;
+	width: 100%;
+	height: 100px;
+}
+
+.main_menu{
+	max-width: 1200px;
+	height: 100px;
+	background: grey;
+	margin: 0 auto;
+}
+
+.menuline{
+	width: 100%;
+	height: 2px;
+	background-color: #c3143c;
+}
+
+.main{	
+	max-width: 1200px;	
+	margin: 0 auto;
+	margin-top: 120px;
+}
+.footer{
+	max-width: 1200px;
+	height: 50px;
+	margin: 0 auto;
+	background: grey;
+}
+.menu_button {
+	display: inline-block;
+	cursor: pointer;
+	border: solid 1px #da7c0c;
+	font: 14px/100% Arial, Helvetica, sans-serif;
+	background: #478dad;
+	text-align: center;
+	outline: none;
+	text-decoration: none;
+}
+.menu_button:hover {
+	background: #f47c20;
+}
+.menu_button:active {
+	position: relative;
+	top: 1px;
+}
+body{
+	height: 100%;
+	text-align: center; 
+}
+
+div.menu_group
+{
+	display: inline-block;
+}
+div.menu_row
+{
+	display: block;
+	width: 100%;
+}
+div.menu_item
+{
+	display: inline-block;
+}
+
+/* MENU  */
+
+.mainmenu{
+	min-height: 30px;
+	text-align: center;
+}
+
+.mainmenu a {
+  color: #fff;
+  padding-left: 10px;
+  padding-right: 10px;
+  
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+
+  vertical-align: middle;
+  margin: auto;
+  height: 30px;
+}
+.mainmenu a:hover {
+  border-radius: 20px 5px;
+  background-color: #0066FF;
+}
+.mainmenu a.msel {
+	border-radius: 20px 5px;
+	background-color: #c3143c;
+}
+.mainmenu a.msel:hover {
+	border-radius: 20px 5px;
+	background-color: #FF00FF;
+}
+
+
+.login{
+	float:right;
+	text-align: right;
+	display: inline;
+}
+
+
+
+.submenu{
+	text-align: left;
+	background-color: #c3143c;
+}
+.submenu .rsubmenu{
+	display: inline;
+	float: right;
+	text-align: right;
+}
+
+.submenu .rsubmenu span{
+	padding: 5px 10px;
+	text-decoration: none;
+	font-weight: bold;
+	display: inline-block;
+	text-align: left;
+
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	border-radius: 20px 5px;
+	background-color: white;
+	color: #c3143c;
+}
+
+.submenu a {
+  color: #fff;
+  padding: 5px 10px;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  text-align: left;
+}
+.submenu a:hover {
+  border-radius: 20px 5px;
+  background-color: #0066FF;
+}
+.submenu a.msel {
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	border-radius: 20px 5px;
+	background-color: white;
+	color: #c3143c;
+}
+.submenu a.msel:hover {
+	border-radius: 20px 5px;
+	background-color: #FF00FF;
+}
+
+/* TABLES  */
+
+.basetable{
+	width: 100%;
+}
+
+.basetable tr:hover td{
+	background-color: #FDE9E8;
+	border-color: #FDE9E8;
+	
+}
+
+.basetable tr:not(:hover) td{
+	transition: 0.2s;
+}
+
+.basetable td{
+	text-align: left;
+}
+
+.cell-min-width{
+	white-space: nowrap;
+	width: 1px;
+}
+
+.cell-buttons{
+	white-space: nowrap;
+	width: 1px;
+}
+
+/* NAVIGATION */
+
+.navigation-left{
+	display: table-cell;
+	text-align: left;
+	float: left;
+	height: 100%;
+	line-height: 100%;
+	vertical-align: middle;
+}
+.navigation-left a{
+	text-decoration: none;
+}
+
+.navigation-right{
+	display: inline-block;
+	text-align: right;
+	float: right;
+	height: 100%;
+	vertical-align: middle;
+}
+.navigation-center{
+	display: inline-block;
+	text-align: center;
+	width: 50%;
+	height: 100%;
+}
+
+.navigation-btn{
+	display: inline-block;
+}
+.navigation-btn img{
+	vertical-align: middle;
+}
+
+/* PAGE */
+
+.page{
+	display: flex;
+	align-items: center;
+}
+.page img{
+	height: 32px;
+}
+.page-left{
+}
+.page-right{
+}
+.page-middle{
+	text-align: left;
+	flex: 1;
+}
+.page-middle a {
+	min-width: 24px;
+
+	border-radius: 10px;
+
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
+
+	vertical-align: middle;
+	margin: auto;
+	background-color: #FFE9C4;
+}
+.page-middle a:hover {
+	background-color: #FFA200;
+}
+.page-middle div {
+	min-width: 24px;
+
+	border-radius: 10px;
+
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
+
+	vertical-align: middle;
+	margin: auto;
+	background-color: #FFA200;
+}
+
+/* LOG */
+
+pre {
+	text-align: left;
+}
+
+/* MEASURE TABLE */
+td.result-ok{
+	background-color: #B0FFB0;
+}
+td.result-fail{
+	background-color: #FFB0B0;
+}
+
+/* COMMON ELEMENTS */
+
+.button {
+
+}
+.button span {
+	vertical-align: middle;
+}
+.button img {
+	vertical-align: middle;
+}

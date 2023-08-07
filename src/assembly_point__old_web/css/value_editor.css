@@ -1,0 +1,70 @@
+
+.edit-form{
+	display: table;
+	width: 100%;
+}
+.edit-form .edit-row {
+	
+	display: table-row;
+	width: 100%;
+	
+}
+
+.edit-form .edit-info{
+	margin: auto;
+	width: 30%;
+	display: table-cell;
+}
+
+.edit-form .edit-cell {
+	width: 70%;
+	display: table-cell;	
+}
+
+.edit-form .edit-edit {
+	min-height: 32px;
+	display: flex;
+	text-align: left;
+}
+
+.edit-form .edit-show {
+	float: right;
+}
+
+.edit-form .edit-inprogress {
+	display: none;
+}
+
+.edit-form .edit-actions{	
+	height: 32px;
+	display: none;
+}
+
+.edit-form input {
+	flex: 3;
+}
+
+.edit-form input[type="checkbox"] {
+	flex: none;
+}
+
+.edit-form select {
+	flex: 3;
+}
+.edit-form label {
+	flex: 3;
+	text-align: left;
+}
+.edit-form span {
+	flex: 3;
+	margin: auto;
+	text-align: left;
+}
+
+.edit-form button{
+	/*flex:0;*/
+	/*margin: auto;*/
+}
+.edit-form button.edit-confirm{
+	display: none;
+}

@@ -1,0 +1,56 @@
+version: "3.8"
+
+x-default-config: &default-config
+    API_VERSION: "v1"
+    APPLICATION_ENV: APPLICATION_ENV_VALUE
+    APPLICATION_RELOAD: 0
+    ASSEMBLY_POINT__DB_URI: ASSEMBLY_POINT__DB_URI_VALUE
+    ASSEMBLY_POINT__SYS_USER_ID: "6ff8eaba-b5b4-49b2-9a83-f48fcdf6d361"
+    JWT_PUBLIC_KEY: JWT_PUBLIC_KEY_VALUE
+    INTERNAL_JWT_ACCESS_TOKEN:  INTERNAL_JWT_ACCESS_TOKEN_VALUE
+
+
+services:
+  assembly_point__balancer:
+    image: WERF_ASSEMBLY_POINT__BALANCER_DOCKER_IMAGE_NAME
+    ports:
+      - 41614:41614 # assembly_point__api
+      - 41656:41656 # assembly_point__web
+      - 41080:41080 # assembly_point__old_web
+    command: [ nginx-debug, '-g', 'daemon off;' ]
+
+
+  assembly_point__api:
+    image: WERF_ASSEMBLY_POINT__COMMON_PYTHON_DOCKER_IMAGE_NAME
+    restart: always
+    environment:
+      APPLICATION_PORT: 8008
+      <<: *default-config
+    command: "bash /docker_app/src/assembly_point__api/bin-start.sh"
+    expose:
+      - 8008
+
+  assembly_point__web:
+    image: WERF_ASSEMBLY_POINT__COMMON_PYTHON_DOCKER_IMAGE_NAME
+    restart: always
+    environment:
+      APPLICATION_PORT: 5000
+      INTERNAL_API_ENDPOINT: "http://assembly_point__api:8008"
+      <<: *default-config
+    command: "/docker_app/src/assembly_point__web/bin-start.sh"
+    expose:
+      - 8008
+
+  assembly_point__old_web:
+    image: WERF_ASSEMBLY_POINT__OLD_WEB_DOCKER_IMAGE_NAME
+    restart: always
+    environment:
+      APPLICATION_PORT: 80
+      BACKEND_PORT: 5678
+      <<: *default-config
+    command: "bash /docker_app/src/assembly_point__old_web/bin-start.sh"
+    expose:
+      - 80
+      - 5678
+    volumes:
+      - ./src/assembly_point__old_web:/docker_app/src/assembly_point__old_web

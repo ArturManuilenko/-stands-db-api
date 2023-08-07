@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+name = "nero_gitlab"
+verify_ssl = false
+url = "https://__token__:kZG7esv72n325czD7Wdg@gitlab.neroelectronics.by/api/v4/projects/996/packages/pypi/simple"
+
+[packages]
+flask-mail = "==0.9.1"
+unipipeline = "==1.4.3"
+jsonschema = "==3.2.0"
+db-utils = {version = "==1.6.5", index = "nero_gitlab"}
+api-utils = {version = "==1.6.17", index = "nero_gitlab"}
+pymysql = "==1.0.2"
+mysql-connector-python = "==8.0.27"
+reportlab = "==3.6.3"
+xlsxwriter = "==3.0.2"
+
+[dev-packages]
+ul_py_tool = {version = "==1.2.2", index = "nero_gitlab"}
+
+[requires]
+python_version = "3.8"
+
+[scripts]
+lint = "ulpytool lint --py-files src/**/*.py --py-files-ignore **/migrations/**/*.py"
+test = "ulpytool test"

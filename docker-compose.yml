@@ -1,0 +1,73 @@
+version: "3.8"
+
+x-default-config: &default-config
+    API_VERSION: "v1"
+    APPLICATION_ENV: "local"
+    APPLICATION_RELOAD: 1
+    ASSEMBLY_POINT__DB_URI: "mysql+pymysql://experemental:experemental@192.168.8.140:3306"
+    ASSEMBLY_POINT__SYS_USER_ID: "6ff8eaba-b5b4-49b2-9a83-f48fcdf6d361"
+    APPLICATION_JWT_PUBLIC_KEY: 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQ0lqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUFvdSs5OGtoM3A2dURTZHZURW5ZVApyNVBSTHJzQ3JVRFRVWU1LanFPTGFTbnFWMmRuWjZLNDhERnhHWFJUcVoycXkyWmpTam5EdmJWazRUeWlhQTZkCjUwbTYvZzQ1OGxFN2ZxYjZtV0d6ajNpVW5HZm5yV2ZsT1VDQnhuMy9pYkRqbUExb21YbkFvdVV0QUtRQ0tvSTYKS2VGc2pvaWVSTzNVYVdNYnYwc0RheUtjOEFOUUFWOGFBY1Z6RTdtNjJYc2xUMHJ2TzBEQnByMHp0dFFXVkc0dApXYWZMbGhhdm43WFdxMzVpQWE5L1A0Rm45SUhOUkRMTHVGODc3SjN2c0NFOUxEdUxCS1Fkd0dZQ3ViNGpqRzVDCjR1RjlhTWoxa1pKSzAzWWVaVTVZZnBKSC9oOUV6MEFKRzI2ZTNMTWltQlBGT3NINUdjSXBFWGVFMCtXd3oxT1AKZVJzZXZ3Qzh4bWNPdEM2QkI1TkRNcS9nRmcvUitlVnpTYjBNUVJVRTgyYlJweTRhcmhwazllK3dBWDQ2TzgxNQpxa0VXQk8xSHJNajVpNmRIL2w2aDFONUVhZ0tLZXFBbU10YXorbDNxMzYwMThEY2V0dTNkZzV2Q3lBOGpRbVNFCm1TZ2tsL3pianV2QkNvS1k5Z0xBdzJRUDY3VDRCb0pOdUg3b25mL0RRa01yQTBuaCt6VWhROHdJNy9DemFDRWEKa0EvczVFemtLVFZqcXhTRXl2RGZqZUNlaHc2S01kbFl1YTVzS1Q5cXdrRDNxSnc3STZQK2hHd3padXNnQ1AvSQp0L1JDcTN5cG9LZjd1TWJ4WVJUU3ovaVhsaUh1a3VQRlh3T0Y5MTlBWWhSUFlRWlZjeG05WGVJOG9xYk92OG9sCm5sTGE5US9YWkxlSEtMWG05ZEU5VzJNQ0F3RUFBUT09Ci0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQ=='
+
+services:
+  assembly_point__balancer:
+    build:
+      context: "."
+      dockerfile: "src/assembly_point__balancer/Dockerfile"
+    volumes:
+      - ./src/assembly_point__balancer/local/:/etc/nginx/:ro
+      - ./src/assembly_point__web/static/:/docker_app/assembly_point__web/static/:ro
+    ports:
+      - 41614:41614 # assembly_point__api
+      - 41656:41656 # assembly_point__web
+      - 41080:41080 # assembly_point__old_web
+    depends_on:
+      - assembly_point__api
+    command: [ nginx-debug, '-g', 'daemon off;' ]
+
+  assembly_point__api:
+    build:
+      context: .
+      dockerfile: "srv/common-python/Dockerfile"
+    restart: always
+    environment:
+      APPLICATION_PORT: 8008
+      <<: *default-config
+    command: "bash /docker_app/src/assembly_point__api/bin-start.sh"
+    expose:
+      - 8008
+    volumes:
+      - ./src:/docker_app/src
+      - ./srv:/docker_app/srv
+
+  assembly_point__old_web:
+      build:
+        context: .
+        dockerfile: "src/assembly_point__old_web/Dockerfile"
+      restart: always
+      environment:
+        APPLICATION_PORT: 80
+        BACKEND_PORT: 5678
+        <<: *default-config
+      command: "bash /docker_app/src/assembly_point__old_web/bin-start.sh"
+      expose:
+        - 80
+        - 5678
+      volumes:
+        - ./src/assembly_point__old_web:/docker_app/src/assembly_point__old_web
+
+  assembly_point__web:
+    build:
+      context: .
+      dockerfile: "srv/common-python/Dockerfile"
+    restart: always
+    environment:
+      APPLICATION_PORT: 5000
+      INTERNAL_API_ENDPOINT: "http://assembly_point__api:8008"
+      INTERNAL_JWT_ACCESS_TOKEN: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6IjNhNjlmYjAzLTZlOTQtNGQ3OC05MmE5LTBlMTRlMGUyNGU1OSIsInVzZXJfaWQiOiIyMTZkYjUwMS0wZDU3LTQyNWEtYTA2Mi03YjM0NjU0MjZhNWIiLCJvcmdhbml6YXRpb25faWQiOiIyMTZkYjUwMS0wZDU3LTQyNWEtYTA2Mi03YjM0NjU0MjZhNWIiLCJ2ZXJzaW9uIjoiMSIsInRva2VuX3R5cGUiOiJhY2Nlc3MiLCJleHBfZGF0ZSI6IjIwMjItMTAtMTJUMTM6MzQ6MjUuNjkzMzA2IiwiZW52IjoibG9jYWwiLCJwZXJtaXNzaW9ucyI6WzExMDA4LDExMDA5LDExMDEwLDExMDExLDExMDEyLDExMDEzLDExMDE0LDExMDE1LDExMDE2LDExMDE3LDExMDE4LDExMDE5LDExMDIwLDExMDIxLDExMDIyLDExMDIzLDExMDI0LDExMDI1LDExMDI2LDExMDI3LDExMDI4LDExMDI5LDExMDMwLDExMDMxLDExMDMyLDExMDMzLDExMDM0LDExMDM1LDExMDM2LDExMDM3LDExMDM4LDExMDM5LDExMDQwLDExMDQxLDExMDQyLDExMDQzLDExMDQ0LDExMDQ1LDExMDQ2LDExMDQ3LDExMDQ4LDExMDQ5LDExMDUwLDExMDUxLDE1MDAxLDE1MDAyLDE1MDAzLDE1MDA0LDE1MDA1LDEyMDEwLDEyMDExLDEyMDEyLDEyMDEzLDE1MDA2LDE1MDA3LDE1MDA4LDExMDAxLDExMDAyLDExMDAzLDExMDA0LDExMDA1LDExMDA2LDExMDA3XX0.gHBhUHRUwNwoGle6aYwvzedEN7FwoaNLf1vFZQTAKV2c1VqJ0Ng5ImeGKDpdFtWC2_srQR2w4q43jM6C-4zvOn_ZvNe953ZKLPT5RKd7oeUftbu1IlqEZqC2K1LVF0Ez1MRwa7zaNH6aoQfD9yCeDAVEZ5NoeIeKCqbDulRPorqbDtSsdHG4ggCPl5C8ht41su9j8YEYP1StB3KPJ1FtpT7i0vnq2dbDoTXOfPNZBaaOnx9VIoqiAqY8Nv2InPYKUbPq3acJhVJ5WAGz4lYuwPzZYRlbqQku2Xrq90yWkNBmrsnjWvqeyQzYCHLFmmFNhSLNyxwtBnauHGdHva6_v3JrIJH18ChvS9CWUkyy5MhQP3KEs3kI8ANjti3Z2vra79sVQ1J8pEDheKrgU_NT5uCM1Dru7-14oCuv3k5mhljpdphMhoiZgfmvrEQiIfPjbykR7-22gqpraUAGv5cygRNIh7hzJWnd6qZmzXn40zZK0srZzjgVGtu23cJAnwW6ZoIPK8m9iSqeC25r4OKdqUzboTckt-lSciyZ3PKYIxEy7qZgvg-00bzp_w-5hasL6ychDrGc9lbQXSDl8xr5XUXw3F5V5Sd5P4G82wZu1NQZtxy31NkgfRdetvmLNH9n3nj8J9L7xhq1Oqufdnp2JKK88J6VIns-7xwFOVgzaXg"
+      <<: *default-config
+    command: "/docker_app/src/assembly_point__web/bin-start.sh"
+    expose:
+      - 5000
+    volumes:
+      - ./src:/docker_app/src
+      - ./srv:/docker_app/srv

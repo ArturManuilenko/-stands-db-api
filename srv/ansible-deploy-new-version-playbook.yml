@@ -1,0 +1,77 @@
+---
+- hosts: main_server
+  gather_facts: true
+  strategy: free
+  become: true
+  become_user: ulab-dev
+  vars:
+    APP_PATH: "/home/ulab-dev/ul_assembly_point"
+    CWD: "{{ lookup('env', 'CWD') }}"
+    ENVIRONMENT: "{{ lookup('env', 'CI_COMMIT_BRANCH') }}"
+    ASSEMBLY_POINT__DB_URI_VALUE: "{{ lookup('env', '{{ ENVIRONMENT|upper }}_ASSEMBLY_POINT__DB_URI') }}"
+    JWT_PUBLIC_KEY_VALUE: "{{ lookup('env', '{{ ENVIRONMENT|upper }}_JWT_PUBLIC_KEY') }}"
+    INTERNAL_JWT_ACCESS_TOKEN_VALUE: "{{ lookup('env', '{{ ENVIRONMENT|upper }}_INTERNAL_JWT_ACCESS_TOKEN_VALUE') }}"
+    WERF_REPO: "{{ lookup('env', 'REPO_REGISTRY_URL') }}"
+    REGISTRY_URL:  "{{ lookup('env', 'CI_REGISTRY') }}"
+    REGISTRY_USER: "{{ lookup('env', 'CI_REGISTRY_USER') }}"
+    REGISTRY_PASSWORD: "{{ lookup('env', 'CI_REGISTRY_PASSWORD') }}"
+    WERF_ASSEMBLY_POINT__COMMON_PYTHON_DOCKER_IMAGE_NAME: "{{ lookup('env', 'WERF_ASSEMBLY_POINT__COMMON_PYTHON_DOCKER_IMAGE_NAME') }}"
+    WERF_ASSEMBLY_POINT__BALANCER_DOCKER_IMAGE_NAME: "{{ lookup('env', 'WERF_ASSEMBLY_POINT__BALANCER_DOCKER_IMAGE_NAME') }}"
+    DATABASE_DEVICE_ENDPOINT: "{{ lookup('env', '{{ ENVIRONMENT }}_DEVICE_DATABASE_ENDPOINT') }}"
+    ASSEMBLY_POINT__USER_ID: "{{ lookup('env', '{{ ENVIRONMENT }}_ASSEMBLY_POINT__USER_ID') }}"
+  tasks:
+    - name: down all processing services
+      docker_compose:
+        debug: yes
+        project_src: "{{ APP_PATH }}"
+        files: "{{ APP_PATH }}/docker-compose.yml"
+        state: present
+        stopped: yes
+        remove_volumes: false
+      environment: &common_vars
+        ENVIRONMENT: "{{ ENVIRONMENT }}"
+        PROJECT: "{{ lookup('env', 'CI_PROJECT_NAME') }}"
+      ignore_errors: true
+
+    - name: Creates directory
+      file:
+        path: "{{ APP_PATH }}"
+        state: directory
+
+    - name: login to registry
+      docker_login:
+        registry: "{{ REGISTRY_URL }}"
+        username: "{{ REGISTRY_USER }}"
+        password: "{{ REGISTRY_PASSWORD }}"
+        reauthorize: yes
+
+    - name: Copy service docker-compose
+      copy:
+        src: "{{ CWD }}/srv/docker-compose.template.yml"
+        dest: "{{ APP_PATH }}/docker-compose.yml"
+        mode: "755"
+
+    - name: configure service docker-compose file
+      replace:
+        path: "{{ APP_PATH }}/docker-compose.yml"
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+      with_items:
+        - {regexp: 'WERF_ASSEMBLY_POINT__COMMON_PYTHON_DOCKER_IMAGE_NAME', replace: "{{ WERF_ASSEMBLY_POINT__COMMON_PYTHON_DOCKER_IMAGE_NAME }}"}
+        - {regexp: 'WERF_ASSEMBLY_POINT__BALANCER_DOCKER_IMAGE_NAME', replace: "{{ WERF_ASSEMBLY_POINT__BALANCER_DOCKER_IMAGE_NAME }}"}
+        - {regexp: 'APPLICATION_ENV_VALUE', replace: "{{ ENVIRONMENT }}"}
+        - {regexp: 'ASSEMBLY_POINT__DB_URI_VALUE', replace: "{{ ASSEMBLY_POINT__DB_URI_VALUE }}"}
+        - {regexp: 'JWT_PUBLIC_KEY_VALUE', replace: "{{ JWT_PUBLIC_KEY_VALUE }}"}
+        - {regexp: 'INTERNAL_JWT_ACCESS_TOKEN_VALUE', replace: "{{ INTERNAL_JWT_ACCESS_TOKEN_VALUE }}"}
+
+    - name: up all
+      docker_compose:
+        debug: yes
+        project_src: "{{ APP_PATH }}"
+        files: "{{ APP_PATH }}/docker-compose.yml"
+        state: present
+        build: false
+        pull: true
+      register: up_all
+      environment:
+        *common_vars

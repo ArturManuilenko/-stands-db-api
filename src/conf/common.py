@@ -1,0 +1,4 @@
+import os
+
+
+ASSEMBLY_POINT__SYS_USER_ID = os.environ['ASSEMBLY_POINT__SYS_USER_ID']

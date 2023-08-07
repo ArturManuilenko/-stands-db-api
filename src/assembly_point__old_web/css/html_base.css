@@ -1,0 +1,9 @@
+table.stend_table {
+  border-collapse: collapse;
+}
+table.stend_table td {
+  border: 1px solid #404040;
+  text-align: left;
+  border-collapse: collapse;
+  padding: 2px 4px;
+}
